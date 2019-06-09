@@ -66,7 +66,7 @@ let baseRect = {
  * 
  * @type  { number }
  */
-let radian = 0;
+let radian = 180;
 
 /**
  * 다운 여부
@@ -135,7 +135,23 @@ function drawBase() {
  * @param {*} h 이동한 높이값
  */
 function drawScale(x, y, w, h) {
-    scaleCtx.drawImage(img, x, y, w, h, 0, 0, scaleCanvas.width, scaleCanvas.height);
+    scaleCtx.clearRect(0, 0, scaleCanvas.width, scaleCanvas.height);
+    
+    // 현재 값을 저장한다.
+    scaleCtx.save();
+
+    // 좌표값을 새로 설정한다. (캔버스를 원점에서 다른점으로 이동 한다.)
+    scaleCtx.translate(scaleCanvas.width / 2, scaleCanvas.height / 2);
+
+    // 돌릴 기준 값을 구한다.
+    scaleCtx.rotate(radian * Math.PI / 180);
+
+    // translate에서 좌표를 구한값으로 이미지를 그리기 때문에 이동한 값 만큼 -를 해줘서 0, 0 으로 맞춰준다.
+    scaleCtx.drawImage(img, x, y, w, h, -scaleCanvas.width / 2, -scaleCanvas.height / 2, scaleCanvas.height, scaleCanvas.width);
+
+    // 이전 값으로 변경한다.
+    scaleCtx.restore();
+
 }
 
 /**
@@ -166,7 +182,7 @@ function drawRoate(degree) {
 /**
  * 마우스 좌표를 가져온다.
  * 
- * @param {*} evt 이벤트
+ * @param {Event} evt 이벤트
  */
 function getMousePos(evt) {
     return {
@@ -178,17 +194,17 @@ function getMousePos(evt) {
 /**
  * 스케일영역을 사각형으로부터 반환한다.
  * 
- * @param {*} x 가로
- * @param {*} y 높이
- * @param {*} w 이동한 가로값
- * @param {*} h 이동한 높이값
+ * @param {number} ix 가로
+ * @param {number} iy 높이
+ * @param {number} iw 이동한 가로값
+ * @param {number} ih 이동한 높이값
  */
-function getScaleRangeByRect(x, y, w, h) {
+function getScaleRangeByRect(ix, iy, iw, ih) {
     return {
-        x: x / baseCanvas.width * img.width,
-        y: y / baseCanvas.height * img.height,
-        w: w / baseCanvas.width * img.width,
-        h: h / baseCanvas.height * img.height,
+        x: ix / baseCanvas.width * img.width,
+        y: iy / baseCanvas.height * img.height,
+        w: iw / baseCanvas.width * img.width,
+        h: ih / baseCanvas.height * img.height,
     }
 }
 
@@ -219,15 +235,25 @@ function getScaleRangeByRect(x, y, w, h) {
         baseRect.w = coordinate.x - baseRect.x;
         baseRect.h = coordinate.y - baseRect.y;
 
-        drawBase(evt);
+        drawBase();
 
-        let scaleRect = getScaleRangeByRect(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
+        let scaleRect;
+        if (radian === 180) {
+            scaleRect = getScaleRangeByRect(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
+            console.log(img.width)
+            console.log(scaleRect.x)
+            scaleRect.x = img.width - scaleRect.x;
+            scaleRect.y = img.height - scaleRect.y;
+            scaleRect.w = -scaleRect.w;
+            scaleRect.h = -scaleRect.h;
+        }
+        
         drawScale(scaleRect.x, scaleRect.y, scaleRect.w, scaleRect.h);
 
         drawRectangle(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
 
         document.getElementById('x').innerHTML =
-            `
+        `
             sx: ${baseRect.x} <br/>
             sy: ${baseRect.y} <br/>
             ex: ${coordinate.x} <br/>
