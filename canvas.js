@@ -1,4 +1,4 @@
-/**
+/*
  * 개인 정리
  * 
  * @description DOM 내용
@@ -55,11 +55,18 @@ let scaleCtx = scaleCanvas.getContext('2d');
  * 기본 사각형값
  */
 let baseRect = {
-    x: 179, 
-    y: 252, 
-    w: 79, 
+    x: 179,
+    y: 252,
+    w: 79,
     h: 77
 }
+
+/**
+ * 각도 값
+ * 
+ * @type  { number }
+ */
+let radian = 0;
 
 /**
  * 다운 여부
@@ -86,13 +93,16 @@ img.src = 'http://www.mhc.kr/files/attach/images/779/229/882/006/a9428b7f2adb9b5
 function init() {
     // 1. 기본 캔버스를 그린다.
     drawBase();
-    
+
     // 2. 확대영역 캔버스를 그린다.
     let scaleRange = getScaleRangeByRect(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
     drawScale(scaleRange.x, scaleRange.y, scaleRange.w, scaleRange.h);
-    
+
     // 3. 기본 캔버스의 사각형을 그린다.
     drawRectangle(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
+
+    // 4. 이미지를 회전한다.
+    // drawRoate(radian);;
 }
 
 /**
@@ -100,7 +110,20 @@ function init() {
  */
 function drawBase() {
     baseCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
-    baseCtx.drawImage(img, 0, 0, baseCanvas.width, baseCanvas.height);
+    // 현재 값을 저장한다.
+    baseCtx.save();
+
+    // 좌표값을 새로 설정한다. (캔버스를 원점에서 다른점으로 이동 한다.)
+    baseCtx.translate(baseCanvas.width / 2, baseCanvas.height / 2);
+
+    // 돌릴 기준 값을 구한다.
+    baseCtx.rotate(radian * Math.PI / 180);
+
+    // translate에서 좌표를 구한값으로 이미지를 그리기 때문에 이동한 값 만큼 -를 해줘서 0, 0 으로 맞춰준다.
+    baseCtx.drawImage(img, -baseCanvas.width / 2, -baseCanvas.height / 2, baseCanvas.height, baseCanvas.width);
+
+    // 이전 값으로 변경한다.
+    baseCtx.restore();
 }
 
 /**
@@ -125,6 +148,17 @@ function drawRectangle(x = baseRect.x, y = baseRect.y, w = baseRect.w, h = baseR
     baseCtx.rect(x, y, w, h);
     baseCtx.stroke();
 }
+
+/**
+ * 회전하여 그린다.
+ */
+function drawRoate(degree) {
+    360 === radian ? radian = degree : radian += degree;
+    drawBase();
+}
+
+// 1. 
+// 2. 
 
 /***********************************************************************************************
  *                                      Helper Objects                                         *
