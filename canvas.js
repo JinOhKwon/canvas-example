@@ -1,59 +1,65 @@
-// DOM 구조안에는 기본적이 이벤트 함수가 있으며, 상황에 맞게 내가 addEvenetListener에 등록 할수 있다.
-// 그럼 내가 여기에서 어떻게 이벤트 등록 하는 방법 또는 사용 하는 방법에대해서 공부 하자!
-// 특정 객체를 만들었을때 관련된 객체(클래스) 대한 API 글을 읽던지 아니면 객체를(개발자도구) 열어본다.
-// 로직을 세운다는거는 나만의 스토리를 생각하자
-// story example
-// 사전조건) 내 사각형의 위치를 캐싱해논다.
-
-// 1. 클릭 이벤트
-// 1.1 클릭 상태를 설정한다
-// 1.2 내가 클릭 한 마우스의 위치가 범위에 해당하는가?
-// 1.3 내가 클릭한 위치의 x, y 좌표를 캐싱한다.
-
-// 2. 무브 이벤트
-// 2.1 내가 클릭한위치를 기준으로 마우스 이동 시  (이전)위치 ~ (이후)위치 만큼 사각형이 이동한다.
-
-// 3. 마우스 업 이벤트
-// 3.1 클릭상태를 해제한다.
-// 3.2  2.1과 동일함.
+/**
+ * 개인 정리
+ * 
+ * @description DOM 내용
+ * DOM 구조안에는 기본적이 이벤트 함수가 있으며, 상황에 맞게 내가 addEvenetListener에 등록 할수 있다.
+ * 그럼 내가 여기에서 어떻게 이벤트 등록 하는 방법 또는 사용 하는 방법에대해서 공부 하자!
+ * 특정 객체를 만들었을때 관련된 객체(클래스) 대한 API 글을 읽던지 아니면 객체를(개발자도구) 열어본다.
+ * 로직을 세운다는거는 나만의 스토리를 생각하자
+ * 
+ * @description story example
+ * 사전조건) 내 사각형의 위치를 캐싱해논다.
+ * 1. 클릭 이벤트
+ * 1.1 클릭 상태를 설정한다
+ * 1.2 내가 클릭 한 마우스의 위치가 범위에 해당하는가?
+ * 1.3 내가 클릭한 위치의 x, y 좌표를 캐싱한다.
+ * 2. 무브 이벤트
+ * 2.1 내가 클릭한위치를 기준으로 마우스 이동 시  (이전)위치 ~ (이후)위치 만큼 사각형이 이동한다.
+ * 3. 마우스 업 이벤트
+ * 3.1 클릭상태를 해제한다.
+ * 3.2  2.1과 동일함.
+ * 
+ * @description 고쳐야할 습관
+ * 자기세계에 갇힌 주석 및 변수명
+ * 주석 작성시 함수명, 함수주석, 함수의 기능 을 명확히 하자
+ * 작성로직 검증 할 생각을 안함
+ * 혼자서 해결 하는게 아닌 인터넷에서 정답을 찾으려고만 함
+ * 
+ * @description TODO 공부해야할 내용
+ * 전체 가로 - 캔버스 왼쪽값 / 캔버스 오른쪽값 - 캔버스 왼쪽값 * 캔버스 가로
+ * let scaleWidthX = (evt.clientX - scaleRect.left) / (scaleRect.right - scaleRect.left) * scaleCanvas.width
+ * let scaleWidthY = (evt.clientY - scaleRect.top) / (scaleRect.bottom - scaleRect.top) * scaleCanvas.height;
+ */
 
 /**
  * 캔버스 객체
  */
-let canvas = document.getElementById('myCanvas');
+let baseCanvas = document.getElementById('baseCanvas');
 
 /**
  * 캔버스 2D 객체
  */
-let ctx = canvas.getContext('2d');
+let baseCtx = baseCanvas.getContext('2d');
 
 /**
- * 캔버스 가로값
- * 
- * @type { number }
+ * 스캐일 캔버스
  */
-let widthX;
+let scaleCanvas = document.getElementById('scaleCanvas');
 
 /**
- * 캔버스 세로값
- * 
- * @type { number }
+ * 스캐일 캔버스 2D객체
  */
-let widthY;
+let scaleCtx = scaleCanvas.getContext('2d');
 
 /**
- * 마우스 다운 가로값
- * 
- * @type { number }
+ * 기본 사각형값
  */
-let mouseDownWidthX;
-
-/**
- * 마우스 다운 높이값
- * 
- * @type { number }
- */
-let mouseDownHeight;
+let baseRect = {
+    x: 179, 
+    y: 252, 
+    w: 79, 
+    h: 77
+}
 
 /**
  * 다운 여부
@@ -63,117 +69,142 @@ let mouseDownHeight;
 let isMouseDown = false;
 
 /**
- * 클릭여부 
+ * 이미지
  * 
- * @type { boolean }
+ * @type { Image }
  */
-let isClick = false;
+let img = new Image();
 
 /**
- * 화면 진입 초기화
+ * 이미지 주소
+ */
+img.src = 'http://www.mhc.kr/files/attach/images/779/229/882/006/a9428b7f2adb9b5b243255d9c5c491dd.jpg';
+
+/**
+ * 초기화 함수다.
  */
 function init() {
-    eventInit();
+    // 1. 기본 캔버스를 그린다.
+    drawBase();
+    
+    // 2. 확대영역 캔버스를 그린다.
+    let scaleRange = getScaleRangeByRect(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
+    drawScale(scaleRange.x, scaleRange.y, scaleRange.w, scaleRange.h);
+    
+    // 3. 기본 캔버스의 사각형을 그린다.
+    drawRectangle(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
 }
 
 /**
- * 이벤트 초기화
+ * 기본적인 그림을 그린다.
  */
-function eventInit() {
+function drawBase() {
+    baseCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
+    baseCtx.drawImage(img, 0, 0, baseCanvas.width, baseCanvas.height);
+}
+
+/**
+ * 스케일을 그린다.
+ * 
+ * @param {*} x 가로
+ * @param {*} y 높이
+ * @param {*} w 이동한 가로값
+ * @param {*} h 이동한 높이값
+ */
+function drawScale(x, y, w, h) {
+    scaleCtx.drawImage(img, x, y, w, h, 0, 0, scaleCanvas.width, scaleCanvas.height);
+}
+
+/**
+ * 사각형을 그린다.
+ * 
+ * @param {number} evt 이벤트
+ */
+function drawRectangle(x = baseRect.x, y = baseRect.y, w = baseRect.w, h = baseRect.y) {
+    baseCtx.beginPath();
+    baseCtx.rect(x, y, w, h);
+    baseCtx.stroke();
+}
+
+/***********************************************************************************************
+ *                                      Helper Objects                                         *
+ ***********************************************************************************************/
+/**
+ * 마우스 좌표를 가져온다.
+ * 
+ * @param {*} evt 이벤트
+ */
+function getMousePos(evt) {
+    return {
+        x: evt.clientX - baseCanvas.getBoundingClientRect().left,
+        y: evt.clientY - baseCanvas.getBoundingClientRect().top
+    };
+}
+
+/**
+ * 스케일영역을 사각형으로부터 반환한다.
+ * 
+ * @param {*} x 가로
+ * @param {*} y 높이
+ * @param {*} w 이동한 가로값
+ * @param {*} h 이동한 높이값
+ */
+function getScaleRangeByRect(x, y, w, h) {
+    return {
+        x: x / baseCanvas.width * img.width,
+        y: y / baseCanvas.height * img.height,
+        w: w / baseCanvas.width * img.width,
+        h: h / baseCanvas.height * img.height,
+    }
+}
+
+/**
+ * 이벤트 리스너를 등록한다.
+ */
+(function addListeners() {
     // 캔버스
     // 콜백으로 내가 원하는 함수로 바인딩 되지 않음... 콜백 함수 구현체에다가 내가 만든 함수를 호출
     // 1. 캔버스 마우스진입해서 마우스 오버로 좌표를 체크한다.
-    canvas.addEventListener('mousedown', (evt) => {
-        getMouseDown(evt);
+    baseCanvas.addEventListener('mousedown', (evt) => {
+        isMouseDown = true;
+
+        const coordinate = getMousePos(evt);
+        // 전체 가로 - 캔버스 왼쪽값 / 캔버스 오른쪽값 - 캔버스 왼쪽값 * 캔버스 가로
+        baseRect.x = coordinate.x;
+        baseRect.y = coordinate.y;
     });
 
     // 2. 마우스가 클릭이 시작되었을때 해당 좌표를 구하며 있다가 시작을 하였을때 좌표를 구한다.
-    canvas.addEventListener('mousemove', (evt) => {
-        getMouseMoveDraw(evt);
+    baseCanvas.addEventListener('mousemove', (evt) => {
+        // 마우스 클릭상태가 아니라면...
+        if (!isMouseDown) {
+            return;
+        }
+
+        const coordinate = getMousePos(evt);
+        baseRect.w = coordinate.x - baseRect.x;
+        baseRect.h = coordinate.y - baseRect.y;
+
+        drawBase(evt);
+
+        let scaleRect = getScaleRangeByRect(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
+        drawScale(scaleRect.x, scaleRect.y, scaleRect.w, scaleRect.h);
+
+        drawRectangle(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
+
+        document.getElementById('x').innerHTML =
+            `
+            sx: ${baseRect.x} <br/>
+            sy: ${baseRect.y} <br/>
+            ex: ${coordinate.x} <br/>
+            ey: ${coordinate.y} <br/>
+            moveWidth: ${baseRect.w} <br/>
+            moveHeight: ${baseRect.h} <br/>
+        `;
     });
 
     // 3. 마우스가 움직이는 거리마다 해당 좌표를 구한다.
-    canvas.addEventListener('mouseup', (evt) => {
-        getMouseUp(evt);
+    baseCanvas.addEventListener('mouseup', (evt) => {
+        isMouseDown = false;
     });
-
-    // 4. 해당 사각형을 확대해서 보여준다.
-}
-
-/**
- * 직사각형 그리기
- * 
- * @param {number} mouseDownWidthX 
- * @param {number} mouseDownHeight 
- */
-function drawRectangle(mouseDownWidthX, mouseDownHeight) {
-    // 이동한 위치값 : 마우스이동거리 - 현재값
-    let width = mouseDownWidthX - widthX;
-    let height = mouseDownHeight - widthY;
-    ctx.beginPath();
-    ctx.rect(widthX, widthY, width, height);
-    ctx.stroke();
-    console.log(`drawRectangle = widthX : ${widthX}, widthY : ${widthY}`);
-}
-
-/**
- * 마우스 좌표값을 구한다.
- * 
- * @param {Event} evt 이벤트
- */
-function getMouseDown(evt) {
-    // 현재 캔버스 객체에 윈도우 기준으로 어디 위치하고 있는지에 대한 함수... (활용 용도는 윈도우가 동적으로 변할시에따라 좌표값을 구할 수 있다.)
-    // 브라우저에서 캔버스가 현재 위치한 좌표값
-    // rect left 패딩 마진값 포함됨
-    let rect = canvas.getBoundingClientRect();
-
-    // 전체 가로 - 캔버스 왼쪽값 / 캔버스 오른쪽값 - 캔버스 왼쪽값 * 캔버스 가로
-    widthX = (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
-    widthY = (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
-
-    isMouseDown = true;
-    // console.log(`getMouseDown = 가로값 : ${widthX} , 세로값 : ${widthY}`);
-}
-
-/**
- * 마우스 움직인 좌표를 구한다.
- * 
- * @param {Event} evt 이벤트
- */
-function getMouseMoveDraw(evt) {
-    // 현재 캔버스 객체에 윈도우 기준으로 어디 위치하고 있는지에 대한 함수... (활용 용도는 윈도우가 동적으로 변할시에따라 좌표값을 구할 수 있다.)
-    let rect = canvas.getBoundingClientRect();
-    mouseDownWidthX = (evt.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
-    mouseDownHeight = (evt.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
-
-    // 마우스가 up 이벤트가 들어오면 그리기를 끝낸다.
-    if (!isMouseDown) {
-        return;
-    }
-
-    // 사각형을 초기화한다.
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // 사각형을 그린다.
-    drawRectangle(mouseDownWidthX, mouseDownHeight);
-}
-
-/**
- * 마우스 업일때 좌표를 구한다.
- * 
- * @param {Event} evt 이벤트
- */
-function getMouseUp(evt) {
-    widthX = evt.clientX - mouseDownWidthX;
-    widthY = evt.clientY - mouseDownHeight;
-
-    isMouseDown = false;
-    console.log(`getMouseUp = widthX : ${widthX}, widthY : ${widthY}`);
-}
-
-/**
- * 초기화
- */
-function clear() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
+}());

@@ -8,13 +8,9 @@
 </head>
 
 <body onload="init()">
-    <canvas id="myCanvas" width="200" height="100" style="border:1px solid #000000;"></canvas>
-    <button onclick="drawLine()">직선 그리기</button>
-    <button onclick="drawCircle()">원 그리기</button>
-    <button onclick="drawText()">글 쓰기</button>
-    <button onclick="drawStroke ()">그리기</button>
-    <button onclick="drawGradient()">색깔 그리기</button>
-    <button onclick="clear()">초기화</button>
+    <canvas id="baseCanvas" width="500" height="500" style="border:1px solid #000000;"></canvas>
+    <canvas id="scaleCanvas" width="300" height="300" style="border:1px solid #000000; margin-top: 10px"></canvas>
+    <p id="x" style="font-size: 15px; position: absolute; top: 0;"></p>
 </body>
 <script type="text/javascript" src="./canvas.js"></script>
 
