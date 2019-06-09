@@ -1,4 +1,4 @@
-/*
+/* 
  * 개인 정리
  * 
  * @description DOM 내용
@@ -33,26 +33,41 @@
 
 /**
  * 캔버스 객체
+ * 
+ * @type { HTMLElement }
  */
 let baseCanvas = document.getElementById('baseCanvas');
 
 /**
- * 캔버스 2D 객체
- */
-let baseCtx = baseCanvas.getContext('2d');
-
-/**
  * 스캐일 캔버스
+ * 
+ * @type { HTMLElement }
  */
 let scaleCanvas = document.getElementById('scaleCanvas');
 
 /**
+ * 캔버스 2D 객체
+ * 
+ * @type { HTMLElement }
+ */
+let baseCtx = baseCanvas.getContext('2d');
+
+/**
  * 스캐일 캔버스 2D객체
+ * 
+ * @type { HTMLElement }
  */
 let scaleCtx = scaleCanvas.getContext('2d');
 
 /**
  * 기본 사각형값
+ * 
+ * @type { object }
+ * 
+ * @property x 가로
+ * @property y 세로
+ * @property w 이동한 가로
+ * @property h 이동한 세로
  */
 let baseRect = {
     x: 75,
@@ -84,6 +99,8 @@ let img = new Image();
 
 /**
  * 이미지 주소
+ * 
+ * @type { string }
  */
 img.src = 'http://www.mhc.kr/files/attach/images/779/229/882/006/a9428b7f2adb9b5b243255d9c5c491dd.jpg';
 
@@ -100,9 +117,6 @@ function init() {
 
     // 3. 기본 캔버스의 사각형을 그린다.
     drawRectangle(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
-
-    // 4. 이미지를 회전한다.
-    // drawRoate(radian);
 }
 
 /**
@@ -129,12 +143,15 @@ function drawBase() {
 /**
  * 스케일을 그린다.
  * 
- * @param {*} x 가로
- * @param {*} y 높이
- * @param {*} w 이동한 가로값
- * @param {*} h 이동한 높이값
+ * @param { string } x 가로
+ * @param { string } y 높이
+ * @param { string } w 이동한 가로값
+ * @param { string } h 이동한 높이값
  */
 function drawScale(x, y, w, h) {
+    // 라디안이 180도 라면... 
+    // TODO 90도 270도일때도 값 구하기
+    // 좌표 계산값 다시 생각해보기...
     if (radian === 180) {
         x = img.width - x;
         y = img.height - y;
@@ -163,7 +180,10 @@ function drawScale(x, y, w, h) {
 /**
  * 사각형을 그린다.
  * 
- * @param {number} evt 이벤트
+ * @param {number} x 가로
+ * @param {number} y 높이
+ * @param {number} w 이동한 가로값
+ * @param {number} h 이동한 높이값
  */
 function drawRectangle(x = baseRect.x, y = baseRect.y, w = baseRect.w, h = baseRect.y) {
     baseCtx.beginPath();
@@ -173,6 +193,8 @@ function drawRectangle(x = baseRect.x, y = baseRect.y, w = baseRect.w, h = baseR
 
 /**
  * 회전하여 그린다.
+ * 
+ * @param {number} degree 각도
  */
 function drawRoate(degree) {
     360 === radian ? radian = degree : radian += degree;
@@ -182,12 +204,10 @@ function drawRoate(degree) {
     drawRectangle(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
 }
 
-// 1. 
-// 2. 
-
 /***********************************************************************************************
  *                                      Helper Objects                                         *
  ***********************************************************************************************/
+
 /**
  * 마우스 좌표를 가져온다.
  * 
@@ -203,17 +223,17 @@ function getMousePos(evt) {
 /**
  * 스케일영역을 사각형으로부터 반환한다.
  * 
- * @param {number} ix 가로
- * @param {number} iy 높이
- * @param {number} iw 이동한 가로값
- * @param {number} ih 이동한 높이값
+ * @param {number} x 가로
+ * @param {number} y 높이
+ * @param {number} y 이동한 가로값
+ * @param {number} h 이동한 높이값
  */
-function getScaleRangeByRect(ix, iy, iw, ih) {
+function getScaleRangeByRect(x, y, y, h) {
     return {
-        x: ix / baseCanvas.width * img.width,
-        y: iy / baseCanvas.height * img.height,
-        w: iw / baseCanvas.width * img.width,
-        h: ih / baseCanvas.height * img.height,
+        x: x / baseCanvas.width * img.width,
+        y: y / baseCanvas.height * img.height,
+        w: y / baseCanvas.width * img.width,
+        h: h / baseCanvas.height * img.height,
     }
 }
 
