@@ -55,10 +55,10 @@ let scaleCtx = scaleCanvas.getContext('2d');
  * 기본 사각형값
  */
 let baseRect = {
-    x: 179,
-    y: 252,
-    w: 79,
-    h: 77
+    x: 75,
+    y: 256,
+    w: 265,
+    h: 99
 }
 
 /**
@@ -66,7 +66,7 @@ let baseRect = {
  * 
  * @type  { number }
  */
-let radian = 180;
+let radian = 0;
 
 /**
  * 다운 여부
@@ -102,7 +102,7 @@ function init() {
     drawRectangle(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
 
     // 4. 이미지를 회전한다.
-    // drawRoate(radian);;
+    // drawRoate(radian);
 }
 
 /**
@@ -135,6 +135,13 @@ function drawBase() {
  * @param {*} h 이동한 높이값
  */
 function drawScale(x, y, w, h) {
+    if (radian === 180) {
+        x = img.width - x;
+        y = img.height - y;
+        w = -w;
+        h = -h;
+    }
+
     scaleCtx.clearRect(0, 0, scaleCanvas.width, scaleCanvas.height);
     
     // 현재 값을 저장한다.
@@ -151,7 +158,6 @@ function drawScale(x, y, w, h) {
 
     // 이전 값으로 변경한다.
     scaleCtx.restore();
-
 }
 
 /**
@@ -171,6 +177,9 @@ function drawRectangle(x = baseRect.x, y = baseRect.y, w = baseRect.w, h = baseR
 function drawRoate(degree) {
     360 === radian ? radian = degree : radian += degree;
     drawBase();
+    let scaleRect = getScaleRangeByRect(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
+    drawScale(scaleRect.x, scaleRect.y, scaleRect.w, scaleRect.h);
+    drawRectangle(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
 }
 
 // 1. 
@@ -237,17 +246,7 @@ function getScaleRangeByRect(ix, iy, iw, ih) {
 
         drawBase();
 
-        let scaleRect;
-        if (radian === 180) {
-            scaleRect = getScaleRangeByRect(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
-            console.log(img.width)
-            console.log(scaleRect.x)
-            scaleRect.x = img.width - scaleRect.x;
-            scaleRect.y = img.height - scaleRect.y;
-            scaleRect.w = -scaleRect.w;
-            scaleRect.h = -scaleRect.h;
-        }
-        
+        let scaleRect = getScaleRangeByRect(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
         drawScale(scaleRect.x, scaleRect.y, scaleRect.w, scaleRect.h);
 
         drawRectangle(baseRect.x, baseRect.y, baseRect.w, baseRect.h);
