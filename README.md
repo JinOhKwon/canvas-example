@@ -1,2 +1,2 @@
 # canvas-example
-canvas-example 이다.
+퓨어로 만든 canvas-example 입니다.
